@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Macros - Transferencias/Depósitos en Cuentas Incorrectas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Graphik:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #820ad1;
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            opacity: 0.8;
+        }
+
+        .nav-tab:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #820ad1;
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: #fafafa;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #820ad1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(130, 10, 209, 0.1);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .macros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+        }
+
+        .macro-card {
+            background: #faf5ff;
+            border: 1px solid #e9d5ff;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .macro-card:hover {
+            box-shadow: 0 4px 12px rgba(130, 10, 209, 0.12);
+            border-color: #d8b4fe;
+        }
+
+        .macro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .macro-icon {
+            width: 32px;
+            height: 32px;
+            background: #820ad1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .macro-title-wrapper {
+            flex: 1;
+        }
+
+        .macro-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .macro-category {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-originador {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .category-receptor {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .category-redeban {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .category-puntored {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .category-ach {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .category-noclientes {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .category-general {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .macro-body {
+            flex: 1;
+        }
+
+        .macro-greeting {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .macro-preview {
+            font-size: 0.85rem;
+            color: #444;
+            line-height: 1.6;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            margin-bottom: 15px;
+        }
+
+        .macro-signature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e9d5ff;
+        }
+
+        .signature-logo {
+            width: 24px;
+            height: 24px;
+            background: #820ad1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+
+        .signature-text {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .macro-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .btn-view {
+            background: #820ad1;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #6b07ab;
+        }
+
+        .btn-copy {
+            background: #9333ea;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #7e22ce;
+        }
+
+        .btn-copy.copied {
+            background: #059669;
+        }
+
+        .btn-favorite {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e9d5ff;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-favorite:hover {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+
+        .btn-favorite.active {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #faf5ff;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            padding-right: 20px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-purpose {
+            background: #f0fdf4;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #10b981;
+            font-size: 0.9rem;
+        }
+
+        .modal-purpose strong {
+            color: #047857;
+        }
+
+        .modal-text {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #fafafa;
+        }
+
+        .modal-footer .btn {
+            flex: 0;
+            padding: 12px 28px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-results h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .no-results p {
+            color: #888;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1a1a1a;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.85rem;
+            }
+
+            .nav-tabs {
+                gap: 6px;
+            }
+
+            .nav-tab {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .macros-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                max-height: 95vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Banco de Macros de Correo</h1>
+            <p>Transferencias/Depósitos recibidos en Cuentas Incorrectas - Manual Operativo CO</p>
+            
+            <nav class="nav-tabs">
+                <button class="nav-tab" data-filter="favorites" onclick="filterMacros('favorites')">⭐ Favoritos</button>
+                <button class="nav-tab active" data-filter="originador" onclick="filterMacros('originador')">Originador</button>
+                <button class="nav-tab" data-filter="receptor" onclick="filterMacros('receptor')">Receptor</button>
+                <button class="nav-tab" data-filter="redeban" onclick="filterMacros('redeban')">Redeban</button>
+                <button class="nav-tab" data-filter="puntored" onclick="filterMacros('puntored')">PuntoRed</button>
+                <button class="nav-tab" data-filter="noclientes" onclick="filterMacros('noclientes')">No Clientes</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar macros por nombre o contenido..." oninput="searchMacros()">
+            </div>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="macros-grid" id="macrosGrid"></div>
+
+        <div class="no-results" id="noResults" style="display: none;">
+            <h3>No se encontraron macros</h3>
+            <p>Intenta con otros términos de búsqueda o cambia el filtro</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="macroModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-purpose" id="modalPurpose"></div>
+                <div class="modal-text" id="modalText"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-copy" onclick="copyFromModal()">Copiar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Macros data
+        const macros = [
+            // MACROS PARA ORIGINADOR
+            {
+                id: 1,
+                title: "Primera respuesta a cliente Originador [canal en vivo] - NuPlaca",
+                category: "originador",
+                purpose: "Informar al cliente que lo ayudaremos pero dejamos las expectativas claras",
+                content: `Comprendo que esta situación pueda ser frustrante. En Nu, estamos comprometidos en ayudarte a resolverla. Por esta razón, voy a escalar tu caso a nuestro equipo especializado, el cual iniciará un proceso de intermediación.
+
+Actuaremos con total transparencia contigo. Es importante que sepas que, si bien haremos todo lo posible por mediar, la devolución de los fondos dependerá de la voluntad del receptor para reintegrar el dinero.
+
+Para gestionar tu solicitud con el equipo encargado, por favor, confírmanos los siguientes datos:
+▪ Fecha en la que realizaste la transferencia.
+▪ Monto de la transferencia.
+▪ Nu Placa a la cual transferiste el dinero
+
+******************************** envía este mensaje tan pronto termines de escalar el caso ***************************************
+
+Nuestro equipo estará en contacto contigo en el transcurso de las próximas 24 a 48 horas hábiles a través del correo electrónico registrado para mantenerte al tanto de tu caso.`
+            },
+            {
+                id: 2,
+                title: "Primera respuesta a cliente Originador [canal en vivo] - Redeban",
+                category: "originador",
+                purpose: "Informar al cliente que lo ayudaremos pero dejamos las expectativas claras",
+                content: `Comprendo que esta situación pueda ser frustrante. En Nu, estamos comprometidos en ayudarte a resolverla.
+
+Por esta razón, voy a escalar tu caso al equipo encargado, el cual reportará al portal Redeban para que se revise con la entidad receptora.
+
+Actuaremos con total transparencia contigo.
+Es importante que sepas que la devolución del dinero depende de la voluntad del receptor para devolver el dinero.
+
+Para gestionar tu solicitud, confírmame los siguientes datos sobre la transacción:
+▪ Fecha
+▪ Monto
+▪ Banco de destino
+
+Nuestro equipo estará en contacto contigo en el transcurso de las próximas 24 a 48 horas hábiles a través del correo electrónico registrado para mantenerte al tanto de tu caso.`
+            },
+            {
+                id: 3,
+                title: "Primera respuesta a cliente Originador [canal en vivo] - PuntoRed",
+                category: "puntored",
+                purpose: "Solicitar información para escalar caso de depósito en efectivo",
+                content: `Hola, _________.
+
+Te saludamos desde el Equipo Nu. Esperamos que te encuentres bien. Estaremos encantados de ayudarte a validar por qué aún no se refleja tu depósito en efectivo.
+
+Con el fin de enviar toda la información al equipo encargado, confírmanos estos datos:
+1) Fecha en la que realizaste el depósito.
+2) Monto del depósito.
+3) Nu Placa a la cual depositaste el dinero.
+4) Captura de pantalla o foto del recibo entregado en Puntored.
+
+Quedamos atentos a tu respuesta. No dudes en avisarnos si tienes alguna pregunta adicional.
+
+Un abrazo,
+Equipo Nu`
+            },
+            {
+                id: 4,
+                title: "Originador inicio intermediación NuPlaca/depósito/ACH",
+                category: "originador",
+                purpose: "Informar al cliente que se ha iniciado un proceso de intermediación tras un error en una transferencia/depósito",
+                content: `Nos alegra saludarte desde Nu.
+
+Te escribimos por el caso que reportaste hace unos días sobre una transferencia realizada por error. Tras revisar la situación, iniciamos un proceso de intermediación y contactamos al titular de la cuenta receptora para solicitar la reversión y evaluar la posibilidad de recuperar los fondos.
+
+Queremos aclarar que Nu no interviene en el diligenciamiento de los datos ni en el direccionamiento de los fondos. En este sentido, Nu no participa en la digitación ni tiene la facultad de modificar los datos suministrados al momento de iniciarse la transferencia.
+
+Como la transferencia se realizó correctamente y el error no fue causado por Nu, no podemos retirar el dinero sin la autorización de la persona que lo recibió. Actuaremos con total transparencia y haremos todo lo posible por mediar; la devolución dependerá del resultado de esa gestión, de la voluntad del receptor y de la disponibilidad de los fondos en su cuenta.
+
+Esperamos tener noticias en un plazo máximo de 8 días hábiles y te informaremos por este mismo medio tan pronto como las tengamos.
+
+Si tienes alguna duda, estamos aquí para ayudarte.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 5,
+                title: "Originador inicio intermediación Bank B a Nu",
+                category: "originador",
+                purpose: "Informar al cliente que se ha iniciado un proceso de intermediación tras un error en una transferencia/depósito",
+                content: `Nos alegra saludarte desde Nu.
+
+Te escribimos por el caso que reportaste hace unos días sobre una transferencia realizada por error. Tras revisar la situación, iniciamos un proceso de intermediación y contactamos al titular de la cuenta receptora para solicitar la reversión y evaluar la posibilidad de recuperar los fondos.
+
+Queremos aclarar que Nu no interviene en el diligenciamiento de los datos ni en el direccionamiento de los fondos. En este sentido, Nu no participa en la digitación ni tiene la facultad de modificar los datos suministrados al momento de iniciarse la transferencia.
+
+Como la transferencia se realizó correctamente y el error no fue causado por Nu, no podemos retirar el dinero sin la autorización de la persona que lo recibió. Actuaremos con total transparencia y haremos todo lo posible por mediar; la devolución dependerá del resultado de esa gestión, de la voluntad del receptor y de la disponibilidad de los fondos en su cuenta.
+
+Esperamos tener noticias en un plazo máximo de 8 días hábiles y te informaremos por este mismo medio tan pronto como las tengamos.
+
+Queremos confirmar contigo, en caso de recuperación de los fondos, si prefieres que sean devueltos a la cuenta originadora en XXXentidadXX a través del portal de gestión Redeban, o si deseas que se abonen a tu cuenta en Nu.
+
+Si tienes alguna duda, estamos aquí para ayudarte.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 6,
+                title: "Originador inicio intermediación Redeban",
+                category: "redeban",
+                purpose: "Indicar los pasos y expectativas: la entidad receptora evaluará la devolución",
+                content: `Te saludamos nuevamente desde Nu Colombia, esperamos te encuentres muy bien.
+
+Te escribimos en relación con el caso que nos escalaste hace unos días por un error en una transferencia vía llaves.
+
+Queremos comentarte que Nu no interviene en el diligenciamiento de los datos ni en el direccionamiento de los fondos. En este sentido, Nu no participa en la digitación ni tiene la facultad de modificar los datos suministrados al momento de iniciarse la transferencia. Como la transferencia vía llaves se realizó correctamente y el error no fue causado por Nu, el envío fue exitoso y el dinero ya se encuentra en la cuenta de la entidad receptora; por tanto, no podemos efectuar una devolución directa.
+
+Tras revisar la situación y para apoyarte en la recuperación, hemos radicado tu caso en el portal de gestión de Redeban radicado Nº XXXX. Este portal es el canal establecido para gestionar transferencias vía llaves y permite coordinar con las entidades del sistema Redeban la solicitud y evaluación de una posible devolución. Ya hemos remitido la solicitud a la entidad receptora XXentidadXX para que contacte a la persona que recibió el dinero por error y evalúe la devolución de los fondos.
+
+Actuaremos con total transparencia; la resolución dependerá de la voluntad del receptor y de la disponibilidad de los fondos en su cuenta.
+
+El tiempo de resolución depende de la gestión de la entidad receptora. Tan pronto tengamos novedades, nos pondremos en contacto contigo por este medio.
+
+Te deseamos un excelente día.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 7,
+                title: "Confirmación caso subido a Redeban (No disputa)",
+                category: "redeban",
+                purpose: "Informar al cx que su caso se reportó al portal Redeban",
+                content: `¡Hola XXX!
+
+Te escribimos desde Nu Colombia con relación al caso que nos escalaste hace unos días sobre una de tus transferencias.
+
+Queremos informarte que, tras revisar la situación, hemos reportado tu caso al portal de gestión Redeban, bajo el número de radicado XXXXXX.
+
+El tiempo de respuesta depende de la entidad consultada, tan pronto tengamos novedades, nos pondremos en contacto contigo nuevamente por este medio.
+
+Esperamos que te encuentres bien y te deseamos un excelente día.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 8,
+                title: "Originador exige datos del receptor",
+                category: "originador",
+                purpose: "Informar al cliente que, por reserva bancaria y protección de datos, Nu no puede revelar los datos del receptor",
+                content: `Te saludamos desde Nu.
+
+Nos da mucho gusto que te hayas puesto en contacto con nosotros. Entendemos que por error enviaste dinero a una cuenta Nu el día [Fecha] por un total de [Monto], y deseas recuperarlo.
+
+En cuanto a los datos de la Cuenta receptora, te comunicamos que por reserva bancaria y protección de datos personales de nuestros clientes no podemos compartir los datos del cliente receptor de los recursos, para lo cual la reserva bancaria solo puede levantarse en los casos expresamente indicados en la ley y a través de las entidades facultadas para este propósito.
+
+Nu, tiene el deber de validar la identidad de la persona que solicita acceso a tus datos personales, de conformidad con lo establecido en la Ley 1266 de 2008, la autorización para el tratamiento de datos personales que otorgaste y nuestra política de tratamiento de datos personales.
+
+Esperamos que entiendas que, dentro de las medidas de seguridad de tus datos, se encuentra garantizar que ningún tercero sin autorización acceda a tus datos personales.
+
+Si te surge alguna otra duda o pregunta, estamos aquí para ayudarte. No dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 9,
+                title: "Originador exige datos del receptor Redeban",
+                category: "redeban",
+                purpose: "Informar al cliente que, por reserva bancaria y protección de datos, las entidades no pueden revelar los datos del receptor",
+                content: `Nos da mucho gusto saludarte y agradecemos que te hayas puesto en contacto con nosotros. Entendemos que realizaste una transferencia por error el día [Fecha] por un monto de [Monto] hacia otra entidad financiera y deseas recuperarla.
+
+Al respecto, te informamos que, dado que el dinero fue enviado hacia una cuenta externa, es la entidad receptora la que posee la información del titular y custodia los fondos. Por motivos de reserva bancaria y protección de datos personales, las entidades financieras no pueden compartir información de sus clientes a terceros, a menos que exista una orden de una autoridad facultada para ello.
+
+Nu cumple estrictamente con la Ley 1266 de 2008 y las políticas de tratamiento de datos personales, garantizando que la información de los usuarios esté protegida en todo momento.
+
+Si tienes alguna otra pregunta o deseas que iniciemos el proceso de contacto con la otra entidad, estamos aquí para ayudarte 24/7 a través de nuestros canales oficiales.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 10,
+                title: "Confirmación ajuste a favor - fondos recuperados",
+                category: "originador",
+                purpose: "Informar al cliente sobre la recuperación de los fondos y que estos han sido abonados en su cuenta Nu",
+                content: `Te escribimos desde Nu con relación al caso escalado previamente.
+
+Nos alegra informarte que el día XXXX realizamos la devolución de la transferencia enviada a una Nuplaca/llave errada por un valor de XXX COP, (incluyendo el impuesto del 4x1000 XXX *Solo para los casos que aplican de GMF XXX). Entendemos lo importante que es para ti, y por eso nos aseguramos de que el dinero ya esté disponible en tu cuenta para que puedas gestionarlo con tranquilidad.
+
+Sabemos que a veces pueden suceder errores involuntarios. Para ayudarte a evitar situaciones similares en el futuro, te recomendamos revisar bien los detalles antes de hacer una transferencia.
+
+Si te surge alguna otra duda o pregunta, estamos aquí para ayudarte. No dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 11,
+                title: "Confirmación ajuste enviado a Redeban",
+                category: "redeban",
+                purpose: "Informar al cliente sobre la recuperación de los fondos y que estos fueron devueltos por Redeban",
+                content: `¡Hola XXXX!
+
+Nos alegra saludarte desde Nu.
+
+Gracias por compartirnos esta información. Nos alegra informarte que el día XXXXX realizamos la recuperación de la transferencia enviada a una llave errada por un valor de $ XXXXX COP.
+
+De acuerdo a tu solicitud, te confirmamos que los fondos serán retornados a la cuenta originadora XXXXX a través del portal Redeban.
+
+Las solicitudes de devolución por transferencias entre llaves se gestionan a través del portal de Redeban. Cuando se recuperan fondos, Redeban cobra a la entidad receptora y abona a la entidad originadora; es la entidad originadora XXXXX la que finalmente aplica el abono a la cuenta del cliente originador.
+
+El día de XXXXX de octubre escalamos la solicitud a Redeban para que se realice el cobro a Nu y se abonen los fondos a XXXXX a través del radicado XXXXX. Finalmente, desde nuestro lado hemos completado el proceso de devolución.
+
+Si tienes alguna otra duda, recuerda que tenemos atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 12,
+                title: "Respuesta Negativa cx originador",
+                category: "originador",
+                purpose: "Informar al cx que no fue posible recuperar los fondos y la gestión realizada",
+                content: `Te saludamos nuevamente desde Nu
+
+Entendemos lo preocupante que puede ser haber enviado erróneamente XXX a una Llave/Nuplaca Nu el XXX. Queremos que sepas que hemos hecho todo lo posible para ayudarte dentro de nuestras posibilidades.
+
+Te comentamos que, dado que el error no se originó en nuestros sistemas, no tenemos la facultad de intervenir directamente en la cuenta destino para recuperar los fondos. Realizamos múltiples intentos de contacto con el receptor del dinero, sin obtener una respuesta favorable. Por lo que finalmente, te informamos que a pesar de nuestros esfuerzos, no fue posible recuperar los fondos.
+
+Sabemos que a veces pueden suceder errores involuntarios. Para ayudarte a evitar situaciones similares en el futuro, te recomendamos revisar bien los detalles antes de hacer una transferencia.
+
+Si te surge alguna otra duda o pregunta, estamos aquí para ayudarte. No dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 13,
+                title: "Respuesta Negativa cx originador Redeban",
+                category: "redeban",
+                purpose: "Informar al cx que no fue posible recuperar los fondos y la gestión realizada",
+                content: `Te saludamos nuevamente desde Nu Colombia, esperamos te encuentres muy bien.
+
+Entendemos lo preocupante que puede ser haber enviado erróneamente XXX a una Llave de XXXEntidadXXX, el [Fecha]. Queremos que sepas que hemos hecho todo lo posible para ayudarte dentro de nuestras posibilidades.
+
+Te comentamos que Nu no interviene en el diligenciamiento de los datos ni en el direccionamiento de los fondos. En este sentido, Nu no participa en la digitación ni tiene la facultad de modificar los datos suministrados al momento de iniciarse la transferencia. Como la transferencia vía llaves se realizó correctamente y el error no fue causado por Nu, la transferencia fue exitosa y el dinero se envió a la cuenta de la entidad receptora; por tanto, no podemos efectuar una devolución directa.
+
+Como te comentamos inicialmente, reportamos tu caso ante Redeban solicitando a la entidad receptora XXentidadXX que iniciara el proceso de intermediación para evaluar la posibilidad de recuperar los fondos. Sin embargo, la respuesta de XXXX fue negativa y no fue posible recuperarlos.
+
+Sabemos que a veces pueden suceder errores involuntarios. Para ayudarte a evitar situaciones similares en el futuro, te recomendamos revisar bien los detalles antes de hacer una transferencia.
+
+Si te surge alguna otra duda o pregunta, estamos aquí para ayudarte. No dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 14,
+                title: "Respuesta Negativa cx originador solicita datos",
+                category: "originador",
+                purpose: "Informar al cx que no fue posible recuperar los fondos y la gestión realizada",
+                content: `Entendemos lo preocupante que puede ser haber enviado/depositado erróneamente XXXX a una cuenta/Llave/Nuplaca Nu el XXX. Queremos que sepas que hemos hecho todo lo posible para ayudarte en lo que está a nuestro alcance.
+
+Te comentamos que, dado que el error no se originó en nuestros sistemas, no tenemos la facultad de intervenir directamente en la cuenta destino para recuperar los fondos. Realizamos múltiples intentos de contacto con el receptor del dinero desde el día DD/MM/AAAA hasta el día DD/MM/AAAA, entre ellas llamadas telefónicas y correos electrónicos, sin obtener una respuesta favorable. Por lo que finalmente, te informamos que a pesar de nuestros esfuerzos, no fue posible recuperar los fondos.
+
+En cuanto a los datos de la Cuenta receptora, te informamos que por reserva bancaria y protección de datos personales de nuestros clientes no podemos compartir los datos del cliente receptor de los recursos, para lo cual la reserva bancaria sólo puede levantarse en los casos expresamente indicados en la ley y a través de las entidades facultadas para este propósito.
+
+Nu, tiene el deber de validar la identidad de la persona que solicita acceso a tus datos personales, de conformidad con lo establecido en la Ley 1266 de 2008, la autorización para el tratamiento de datos personales que otorgaste y nuestra política de tratamiento de datos personales. Esperamos que entiendas que, dentro de las medidas de seguridad de tus datos, se encuentra garantizar que ningún tercero sin autorización acceda a tus datos personales.
+
+Actualmente, no contamos con una solución alternativa, entendemos la frustración e incomodidad que esta situación puede generarte. Seguimos aquí para apoyarte en cualquier otra gestión que necesites y estamos comprometidos en ofrecerte siempre el mejor servicio. Sin embargo, estamos a total disposición para colaborar con las autoridades competentes, quienes pueden solicitar esta información siguiendo los procedimientos legales establecidos y en colaborarte o brindar cualquier otro tipo de información relacionada con tu caso al que haya lugar.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 15,
+                title: "Respuesta Negativa Entidad no responde",
+                category: "redeban",
+                purpose: "Informar al cx que no fue posible recuperar los fondos ya que la entidad no dio respuesta",
+                content: `Te saludamos nuevamente desde Nu Colombia, esperamos te encuentres muy bien.
+
+Entendemos lo preocupante que puede ser haber enviado erróneamente XXX a una Llave de XXXEntidadXXX, el [Fecha]. Queremos que sepas que hemos hecho todo lo posible para ayudarte dentro de nuestras posibilidades.
+
+Te comentamos que Nu no interviene en el diligenciamiento de los datos ni en el direccionamiento de los fondos. En este sentido, Nu no participa en la digitación ni tiene la facultad de modificar los datos suministrados al momento de iniciarse la transferencia. Como la transferencia vía llaves se realizó correctamente y el error no fue causado por Nu, la transferencia fue exitosa y el dinero se envió a la cuenta de la entidad receptora; por tanto, no podemos efectuar una devolución directa.
+
+Como te comentamos inicialmente, reportamos tu caso ante Redeban solicitando a la entidad receptora XXentidadXXX que iniciara el proceso de intermediación para evaluar la posibilidad de recuperar los fondos. Sin embargo, no recibimos respuesta de XXentidadXXX y no fue posible recuperarlos.
+
+Sabemos que a veces pueden suceder errores involuntarios. Para ayudarte a evitar situaciones similares en el futuro, te recomendamos revisar bien los detalles antes de hacer una transferencia.
+
+Si te surge alguna otra duda o pregunta, estamos aquí para ayudarte. No dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 16,
+                title: "Inicio disputa Redeban de otro banco a Nu - Recontacto o PQR",
+                category: "redeban",
+                purpose: "Informar al originador que no recibió ayuda de la entidad originadora, que lo ayudaremos con la intermediación",
+                content: `Gracias por comunicarte con nosotros e informarnos que necesitas ayuda para recuperar los fondos que enviaste por error de digitación a una llave Nu desde otra entidad. Queremos apoyarte en este proceso dentro de lo que está a nuestro alcance. Por ello, iniciaremos la intermediación con la persona que recibió los fondos por error.
+
+Dado que la transferencia se realizó correctamente y el error no fue causado por Nu, no podemos retirar el dinero sin la autorización de la persona que lo recibió. Actuaremos con total transparencia y haremos todo lo posible por mediar; la devolución dependerá del resultado de esa gestión, de la voluntad del receptor y de la disponibilidad de los fondos en su cuenta.
+
+Esperamos tener novedades en un plazo máximo de 8 días hábiles y te informaremos por este mismo medio tan pronto como las tengamos.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 17,
+                title: "Solicitud método devolución Redeban",
+                category: "redeban",
+                purpose: "Obtener manifestación del originador sobre la cuenta donde desea recibir los fondos",
+                content: `Te contactamos en relación con el caso que nos reportaste sobre la transferencia que enviaste desde XXX a una llave errada Nu, por error de digitación.
+
+Queremos confirmar contigo, en caso de recuperación de los fondos, si prefieres que sean devueltos a la cuenta originadora en XXXentidadXX a través del portal de gestión Redeban, o si deseas que se abonen a tu cuenta en Nu.
+
+Quedamos atentos a tu confirmación.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 18,
+                title: "Solicitud Certificado trx enviada de otra entidad a Nu Redeban",
+                category: "redeban",
+                purpose: "Obtener certificado de la transferencia para poder escalar la reclamación a la entidad originadora",
+                content: `Nos alegra saludarte.
+
+Te escribimos desde Nu Colombia con relación al caso que nos escalaste hace unos días sobre la transferencia que te enviaron a tu Cuenta Nu desde otra entidad y aún no se ha reflejado. Desde Nu confirmamos que los fondos no han ingresado a tu cuenta.
+
+Para que podamos escalar el reclamo a XXXX a través del portal Redeban y avanzar cuanto antes, por favor envíanos certificado de la transferencia donde se vea claramente:
+- La llave o destino usado (número de cuenta, cédula, teléfono o correo), la entidad a la que se envió, la fecha y la hora de la operación, y lo más importante el código ID Mol. Sin esta información no es posible hacer la validación.
+
+Como la transacción no ha llegado a Nu, no tenemos información en nuestros sistemas; por ello, la entidad originadora debe validar su estado. En cuanto lo recibamos, lo elevamos de inmediato. Quedamos atentos para ayudarte.
+
+Quedamos atentos a tu confirmación.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 19,
+                title: "Originador solicita nueva intermediación",
+                category: "originador",
+                purpose: "Informar al originador que de acuerdo a su solicitud iniciaremos un nuevo proceso de disputa",
+                content: `Te saludamos desde Nu.
+
+Comprendemos tu preocupación y la frustración que genera la transferencia de $XXXX que realizaste el XXX. Entendemos que el envío fue a una llave/Nuplaca errada debido a un error de digitación.
+
+Queremos aclarar que esta situación se presentó por un error en los datos que se ingresaron al momento de hacer la transferencia. Por esta razón, Nu no participa en el proceso de digitación ni tiene la facultad de modificar los datos una vez que la transferencia ha sido iniciada.
+
+Recibimos tu solicitud para que se retornen los fondos que enviaste por error a la NuPlaca incorrecta. Te comentamos que desde el [Fecha] enviamos comunicaciones al cliente receptor de los fondos para que regresara el dinero. Esto te lo comunicamos en la misma fecha por medio de correo.
+
+¿Qué ocurre? Tenemos un plazo de 8 días hábiles para que la persona autorice que removamos los fondos de su cuenta y los regresemos al titular. Esto es de suma importancia porque si el receptor no brinda su autorización, no podemos proceder. En este caso particular, la persona que recibió los fondos no dio respuesta alguna y no fue posible retornar el dinero a tu cuenta.
+
+Considerando que solicitas una nueva intermediación, lo que haremos a continuación, es enviar una nueva comunicación solicitando que devuelva los fondos. En este punto nos gustaría ser muy transparentes contigo, dado que el error no se originó en nuestros sistemas, dependemos completamente de la voluntad del receptor y de la disponibilidad de los fondos en su cuenta, ya que no podemos remover el dinero de las cuentas sin autorización del titular, esto no está permitido.
+
+En cuanto tengamos novedades te informaremos de inmediato.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 20,
+                title: "Originador solicita nueva intermediación Redeban",
+                category: "redeban",
+                purpose: "Informar al originador que de acuerdo a su solicitud iniciaremos un nuevo proceso de disputa a través del portal Redeban",
+                content: `Esperamos que te encuentres muy bien.
+
+Comprendemos tu preocupación y la frustración que genera la transferencia de $XXXX que realizaste el XXX. Entendemos que el envío fue a una llave errada de otra entidad, debido a un error de digitación.
+
+Queremos aclarar que esta situación se presentó por un error en los datos que se ingresaron al momento de hacer la transferencia. Por esta razón, Nu no participa en el proceso de digitación ni tiene la facultad de modificar los datos una vez que la transferencia ha sido iniciada.
+
+De igual forma, quisimos apoyarte en lo que estaba en nuestras manos. Por ello, contactamos a la entidad receptora, XXXXXEntidadXX, a través del portal Redeban. Este portal es el canal establecido para gestionar transferencias vía llaves y permite coordinar con las entidades del sistema Redeban la solicitud y evaluación de una posible devolución.
+
+Radicamos la solicitud con el número de ticket XXXX, solicitando a la entidad iniciar el proceso de intermediación y comunicación directamente con el cliente que recibió el dinero. La entidad receptora es la única que tiene acceso a los datos de la persona que recibió los fondos.
+
+La respuesta de XXEntidadXX a este caso fue negativa, por lo que no fue posible recuperar el dinero.
+
+No obstante, en un esfuerzo por ayudarte, hemos escalado nuevamente el caso ante la entidad a través del portal con el número XXXX, solicitando un nuevo proceso de intermediación. En este punto nos gustaría ser muy transparentes contigo, dado que el error no se originó en nuestros sistemas, el éxito de este caso depende de la voluntad del receptor y de la disponibilidad de los fondos en su cuenta.
+
+Seguimos a tu disposición por si tienes alguna otra duda.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 21,
+                title: "Receptor envía los fondos de vuelta proactivamente",
+                category: "originador",
+                purpose: "Confirmar con el originador que los fondos fueron devueltos por el receptor",
+                content: `Te escribimos desde Nu con relación a tu solicitud escalada previamente.
+
+Te confirmamos que hemos revisado tu caso, y la persona que recibió los [Monto] ya devolvió el dinero a tu cuenta el día [Fecha y hora]. Así que no tienes de qué preocuparte, ¡tu caso se resolvió con éxito!
+
+Si surge alguna otra duda o necesitas más ayuda, no dudes en contactarnos a través de nuestros canales de atención al cliente.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 22,
+                title: "Devolución parcial",
+                category: "originador",
+                purpose: "Informar que se recupera un monto parcial",
+                content: `Te escribimos desde Nu con relación al caso escalado previamente.
+
+Estamos aquí para darte seguimiento. Te contamos que logramos recuperar una parte del dinero y ya realizamos la devolución de [Monto] COP el día [Fecha].
+
+La recuperación fue parcial debido a que la cuenta destino no contaba con los fondos suficientes. Queremos que estés tranquilo, ya puedes ver este monto reflejado en tu cuenta para usarlo como necesites.
+
+Sabemos que a veces pueden suceder errores involuntarios. Para ayudarte a evitar situaciones similares en el futuro, te recomendamos revisar bien los detalles antes de hacer una transferencia.
+
+Si te surge alguna otra duda o pregunta, estamos aquí para ayudarte. No dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 23,
+                title: "Gestión de caso Bre-b para terceros con poder",
+                category: "originador",
+                purpose: "Informar al tercero que se comunica y que compartió el poder la gestión que se realizó con los fondos recuperados",
+                content: `De acuerdo a tu solicitud relacionada con la recuperación de fondos enviados desde XXXXX a una llave errada Nu @XXXX, por error de digitación por valor de $XXXX COP el día XXXXXX, identificada con el id XXXBanrepidXXX, te comentamos que:
+
+El XXXXX de 2025 recibimos tu solicitud para iniciar el proceso de intermediación. Dado que el titular de la transferencia no corresponde contigo, y por motivos de protección de datos y confidencialidad, no pudimos proporcionarte información sobre el proceso, te solicitamos notificar al titular de la transferencia, reportar al banco originador el envío erróneo; de esta manera, Nu recibiría el caso por el canal establecido para este tipo de transferencias inmediatas, el Portal de Gestión Redeban, y presentar poder que nos autorizará a brindarte información.
+
+Las solicitudes de recuperación por transferencias entre llaves se gestionan a través del portal de Redeban. Cuando se recuperan fondos, Redeban cobra a la entidad receptora y abona a la entidad originadora; es la entidad originadora la que finalmente aplica el abono a la cuenta del cliente originador.
+
+Desde Nu iniciamos el proceso de intermediación y contactamos al usuario que recibió la transferencia por error. El receptor confirmó que no reconocía los fondos y aceptó devolverlos, por lo que procedimos a retirarlos de su cuenta.
+
+Con los fondos recuperados, y al no recibir reporte de XXXXXX a través del portal, el XXXXX de 2025, escalamos radicado número XXXXX en Redeban, informando a XXXXXX sobre la recuperación y solicitando la devolución a la cuenta originadora de la transacción con id XXXpaymentidXXX a nombre de XXXXXXXX. El XXXXXXXX de 2025, Redeban confirmó, dentro del radicado XXXXXXX, que los fondos fueron descontados de Nu y abonados a XXXXXXXX para que realice el ajuste correspondiente a la cuenta del cliente originador del movimiento errado.
+
+Finalmente, desde nuestro lado hemos completado el proceso de devolución y los recursos recuperados fueron enviados a la entidad originadora a través del canal establecido para este tipo de transferencias. Si el dinero aún no aparece en la cuenta originadora, ese último paso depende exclusivamente de XXXXXXXX. Te recomendamos comunicarte con la entidad para confirmar el estado del abono.
+
+Si tienes alguna otra pregunta, recuerda que tenemos atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            // MACROS PARA RECEPTOR
+            {
+                id: 24,
+                title: "Primera comunicación (cuenta no bloqueada)",
+                category: "receptor",
+                purpose: "Solicitar confirmación al receptor sobre si reconoce los fondos de la transacción que recibió posiblemente por error",
+                content: `Te contactamos debido a que recientemente, nos informaron de una transferencia por valor de $XXX que ingresó el XXXXX a tu cuenta. Este movimiento iba dirigido a otra NuPlaca/Llave.
+
+Para regresar los fondos a su origen, solicitamos que nos confirmes si desconoces la procedencia de estos fondos. Adicionalmente, queremos darte la tranquilidad que la remoción de este dinero, no afectará tu cuenta ni generará ningún cobro adicional.
+
+Esperamos tu respuesta a este correo lo antes posible y te recomendamos dejar el dinero en el disponible.
+
+Te recomendamos, de manera amable, que devuelvas cualquier dinero que hayas recibido por error y que no te pertenezca, para evitar posibles malentendidos o complicaciones legales.
+
+Si tienes alguna pregunta o necesitas más información, no dudes en ponerte en contacto con nosotros. Estamos aquí para ayudarte.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 25,
+                title: "Primera comunicación (cuenta bloqueada)",
+                category: "receptor",
+                purpose: "Solicitar confirmación al receptor sobre si reconoce los fondos de la transacción que recibió posiblemente por error",
+                content: `Te contactamos debido a que recientemente, nos informaron de una transferencia por valor de $XXX que ingresó el XXXXX a tu cuenta. Este movimiento iba dirigido a otra NuPlaca/Llave.
+
+Para regresar los fondos a su origen, solicitamos que nos confirmes si desconoces la procedencia de estos fondos. Adicionalmente, queremos darte la tranquilidad que la remoción de este dinero, no afectará tu cuenta ni generará ningún cobro adicional.
+
+Esperamos tu respuesta a este correo lo antes posible.
+
+Por último, recuerda que de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Sección 15.1. "Nu podrá bloquear la Cuenta Nu cuando lo estime necesario por motivos de seguridad.."
+
+Te recomendamos, de manera amable, que devuelvas cualquier dinero que hayas recibido por error y que no te pertenezca, para evitar posibles malentendidos o complicaciones legales.
+
+Si tienes alguna pregunta o necesitas más información, no dudes en ponerte en contacto con nosotros. Estamos aquí para ayudarte.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 26,
+                title: "Confirmación remoción de fondos (Agradecimiento)",
+                category: "receptor",
+                purpose: "Agradecer e informar al receptor que los fondos serán retirados",
+                content: `Te saludamos desde Nu.
+
+Agradecemos mucho tu colaboración al informarnos que no reconoces los fondos; eso nos permite acelerar el trámite de remoción del dinero.
+
+Procederemos a devolverlos a la cuenta de origen en un plazo de 48 horas hábiles.
+
+Te comentamos que este proceso es completamente transparente de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento. Estos movimientos se realizarán siempre conforme a la normatividad vigente, las políticas internas de Nu y las autorizaciones aplicables. A continuación, se detallan las principales circunstancias en las que estos débitos pueden efectuarse". Sección 4.3. "Por corrección de errores, incluyendo, entre otros, fallas en el sistema, sumas abonadas de manera equivocada, transacciones no autorizadas, duplicadas o realizadas en exceso, inconsistencias en los datos de la operación, débitos de abonos temporales realizados provisionalmente cuando el resultado de una investigación no es favorable, así como ajustes necesarios por irregularidades en el cálculo de intereses, tarifas u otros conceptos relacionados con el manejo de la cuenta, todo conforme a las políticas internas de Nu. En caso de que al momento del débito no cuentes con fondos suficientes, te obligas a reembolsar el monto correspondiente en un plazo no mayor a tres días contados desde la solicitud realizada por Nu".
+
+Si tienes alguna duda o pregunta, no dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles las 24 horas, todos los días. ¡Será un placer ayudarte!
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 27,
+                title: "Solicitud soportes - cx reconoce fondos (cuenta no bloqueada)",
+                category: "receptor",
+                purpose: "Solicitar comprobantes que acrediten que los fondos recibidos pertenecen al receptor",
+                content: `Te escribimos nuevamente desde Nu.
+
+Queremos agradecerte por tu paciencia y la colaboración brindada durante este proceso.
+
+Gracias por confirmarnos que reconoces los fondos recibidos. Para poder concluir la investigación, te pedimos que, por favor, nos proporciones la siguiente información:
+
+● Adjunta el comprobante o tirilla de la entidad originadora donde se aprecien claramente: fecha y hora de la operación, monto, número de referencia/ID de la transacción, nombre del titular y cuenta o llave destino.
+
+● Relación y motivo del depósito: ¿Cuál es tu relación con la persona que envió la transferencia y la razón por la cual se realizan los depósitos en tu cuenta por $ XXXX el día XXXXX? Por favor, adjunta documentos que puedan acreditar el origen de estos fondos.
+
+Te recomendamos, de manera amable, que devuelvas cualquier dinero que hayas recibido por error y que no te pertenezca, para evitar posibles malentendidos o complicaciones legales.
+
+Si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 28,
+                title: "Receptor comparte soportes válidos",
+                category: "receptor",
+                purpose: "Agradecer a receptor soportes e informar cierre del caso",
+                content: `Te escribimos nuevamente desde Nu.
+
+Queremos agradecerte por tu paciencia y la colaboración brindada durante este proceso.
+
+Muchas gracias por compartir con nosotros la información solicitada, nos complace confirmar que todo está en orden. Con esto, podemos dar por concluido el caso.
+
+Si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 29,
+                title: "Remoción bajo términos del contrato Cx (cuenta no bloqueada)",
+                category: "receptor",
+                purpose: "Informar al receptor la remoción de fondos acreditados por error por falta de respuesta a la solicitud de verificación",
+                content: `Te escribimos nuevamente desde Nu.
+
+Opción 1****Según la información que solicitamos el día XXX, hemos notado que no recibimos una respuesta de tu parte, por lo que no fue posible verificar que los fondos ingresados te pertenezcan.***
+
+Opción 2***/De acuerdo a la respuesta que compartiste con nosotros a través de correo el día DD/MM/AAA en la que nos confirmas que el dinero ingresado el día DD/MM/AAA a tu Cuenta Nu, por un monto total de $XXX COP, pertenece a alguien más****
+
+, y debido a que el monto fue abonado por error en tu cuenta, te confirmamos que hemos retirado dichos fondos de tu Cuenta de Ahorros Nu de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento. Estos movimientos se realizarán siempre conforme a la normatividad vigente, las políticas internas de Nu y las autorizaciones aplicables. A continuación, se detallan las principales circunstancias en las que estos débitos pueden efectuarse". Sección 4.3. "Por corrección de errores, incluyendo, entre otros, fallas en el sistema, sumas abonadas de manera equivocada, transacciones no autorizadas, duplicadas o realizadas en exceso, inconsistencias en los datos de la operación, débitos de abonos temporales realizados provisionalmente cuando el resultado de una investigación no es favorable, así como ajustes necesarios por irregularidades en el cálculo de intereses, tarifas u otros conceptos relacionados con el manejo de la cuenta, todo conforme a las políticas internas de Nu. En caso de que al momento del débito no cuentes con fondos suficientes, te obligas a reembolsar el monto correspondiente en un plazo no mayor a tres días contados desde la solicitud realizada por Nu".
+
+De acuerdo a lo mencionado anteriormente, esperamos que esta información resuelva tus dudas, pero, si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 30,
+                title: "Solicitud depósito a la cuenta receptora",
+                category: "receptor",
+                purpose: "Solicitar al receptor que ingrese los fondos",
+                content: `Te saludamos desde Nu. Esperamos que te encuentres muy bien.
+
+Gracias por tu colaboración y por confirmar que no reconoces los fondos; sin embargo, te comentamos que en tu Cuenta Nu solo tienes disponible $XXX COP, pero el valor que se le debe regresar al originador es de $XXX COP.
+
+Para poder proceder con la devolución del monto completo, te solicitamos amablemente que realices un depósito o transferencia hacia tu Cuenta Nu para cubrir la diferencia, que en este caso es de $XXX COP. Esto nos permitirá manejar la devolución de manera adecuada y asegurarnos de que el originador reciba el total correspondiente.
+
+Estamos pendientes del ingreso del dinero a tu Cuenta Nu para poder proceder con el siguiente paso.
+
+Si tienes alguna duda o pregunta, por favor no dudes en contactarnos a través de nuestros canales de atención al cliente, que están disponibles las 24 horas, todos los días. ¡Será un placer ayudarte!
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 31,
+                title: "Advertencia Legal",
+                category: "receptor",
+                purpose: "Notificar al receptor que ya se intentó contacto previo sobre una transferencia recibida por error y que no hubo respuesta",
+                content: `Te escribimos nuevamente desde Nu.
+
+En la fecha XXX nos contactamos contigo en relación con una transferencia que recibiste por error en tu cuenta, por valor de [XXXX]. Sin embargo, no recibimos respuesta alguna y no ha sido posible realizar la devolución de los fondos a la cuenta de origen.
+
+Para regresar los fondos a su origen, solicitamos que nos confirmes si desconoces la procedencia de estos fondos. Adicionalmente, queremos darte la tranquilidad que la remoción de este dinero, no afectará tu cuenta ni generará ningún cobro adicional.
+
+Te comentamos que este proceso es completamente transparente de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento. Estos movimientos se realizarán siempre conforme a la normatividad vigente, las políticas internas de Nu y las autorizaciones aplicables. A continuación, se detallan las principales circunstancias en las que estos débitos pueden efectuarse". Sección 4.3. "Por corrección de errores, incluyendo, entre otros, fallas en el sistema, sumas abonadas de manera equivocada, transacciones no autorizadas, duplicadas o realizadas en exceso, inconsistencias en los datos de la operación, débitos de abonos temporales realizados provisionalmente cuando el resultado de una investigación no es favorable, así como ajustes necesarios por irregularidades en el cálculo de intereses, tarifas u otros conceptos relacionados con el manejo de la cuenta, todo conforme a las políticas internas de Nu. En caso de que al momento del débito no cuentes con fondos suficientes, te obligas a reembolsar el monto correspondiente en un plazo no mayor a tres días contados desde la solicitud realizada por Nu".
+
+Punto 15. Sección 15.1. "Nu podrá bloquear la Cuenta Nu cuando lo estime necesario por motivos de seguridad.."
+
+Te recomendamos, de manera amable, que devuelvas cualquier dinero que hayas recibido por error y que no te pertenezca, para evitar posibles malentendidos o complicaciones legales.
+
+Si tienes alguna duda o pregunta, no dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles las 24 horas, todos los días. ¡Será un placer ayudarte!
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 32,
+                title: "Solicita desbloqueo pero no aclara sobre los fondos",
+                category: "receptor",
+                purpose: "Informar al receptor que el bloqueo se levantará en cuanto comparta los soportes o confirmación de no reconocer la transferencia",
+                content: `Te escribimos nuevamente desde Nu.
+
+Queremos ser completamente transparentes contigo respecto a tu situación. Aquí te aclaramos algunos puntos importantes:
+
+Entendemos lo importante que es para ti tener acceso a tus fondos y queremos recordarte que, según el apartado 15.1. "Nu podrá bloquear la Cuenta Nu cuando lo estime necesario por motivos de seguridad.." En este caso, realizamos un bloqueo preventivo porque recibimos un reporte relacionado con estos fondos.
+
+Para continuar con tu solicitud de desbloqueo es necesario que nos puedas dar respuesta a la comunicación que te compartimos el día xxxxx, donde solicitamos nos confirmaras si reconocías los fondos recibidos.
+
+En caso de reconocer los fondos te agradecemos que nos proporciones la siguiente información:
+
+● Adjunta el comprobante o tirilla de la entidad originadora donde se aprecien claramente: fecha y hora de la operación, monto, número de referencia/ID de la transacción, nombre del titular y cuenta o llave destino.
+
+● Relación y motivo del depósito: ¿Cuál es tu relación con la persona que envió la transferencia y la razón por la cual se realizan los depósitos en tu cuenta por $ XXXX el día XXXXX? Por favor, adjunta documentos que puedan acreditar el origen de estos fondos.
+
+Te recomendamos, de manera amable, que devuelvas cualquier dinero que hayas recibido por error y que no te pertenezca, para evitar posibles malentendidos o complicaciones legales.
+
+Esperamos que esta información resuelva tus dudas, pero, si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 33,
+                title: "Remoción bajo términos del contrato cx no envía soportes (cuenta bloqueada)",
+                category: "receptor",
+                purpose: "Informar remoción de los fondos al no recibir justificación de los fondos recibidos",
+                content: `Hola, XXXX.
+
+Te escribimos nuevamente desde Nu.
+
+Queremos agradecerte por tu paciencia y la colaboración brindada durante este proceso.
+
+Queremos confirmarte que hemos retirado el bloqueo temporal de tu Cuenta Nu de manera que puedes continuar usándola con tranquilidad y realizar los movimientos financieros que requieras con ella.
+
+Opción 1****Según la información que solicitamos el día XXX, hemos notado que no recibimos una respuesta de tu parte, por lo que no fue posible verificar que los fondos ingresados te pertenezcan.***
+
+Opción 2***/De acuerdo a la respuesta que compartiste con nosotros a través de correo el día DD/MM/AAA en la que nos confirmas que el dinero ingresado el día DD/MM/AAA a tu Cuenta Nu, por un monto total de $XXX COP, pertenece a alguien más****
+
+, y debido a que el monto fue abonado por error en tu cuenta, te confirmamos que hemos retirado dichos fondos de tu Cuenta de Ahorros Nu de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento. Estos movimientos se realizarán siempre conforme a la normatividad vigente, las políticas internas de Nu y las autorizaciones aplicables. A continuación, se detallan las principales circunstancias en las que estos débitos pueden efectuarse". Sección 4.3. "Por corrección de errores, incluyendo, entre otros, fallas en el sistema, sumas abonadas de manera equivocada, transacciones no autorizadas, duplicadas o realizadas en exceso, inconsistencias en los datos de la operación, débitos de abonos temporales realizados provisionalmente cuando el resultado de una investigación no es favorable, así como ajustes necesarios por irregularidades en el cálculo de intereses, tarifas u otros conceptos relacionados con el manejo de la cuenta, todo conforme a las políticas internas de Nu. En caso de que al momento del débito no cuentes con fondos suficientes, te obligas a reembolsar el monto correspondiente en un plazo no mayor a tres días contados desde la solicitud realizada por Nu".
+
+De acuerdo a lo mencionado anteriormente, esperamos que esta información resuelva tus dudas, pero, si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 34,
+                title: "Solicitud soportes - cx reconoce fondos (cuenta bloqueada)",
+                category: "receptor",
+                purpose: "Solicitar comprobantes que acrediten que los fondos recibidos pertenecen al receptor",
+                content: `Te escribimos nuevamente desde Nu.
+
+Queremos agradecerte por tu paciencia y la colaboración brindada durante este proceso.
+
+Gracias por confirmarnos que reconoces los fondos recibidos. Para poder concluir la investigación, te pedimos que, por favor, nos proporciones la siguiente información:
+
+● Adjunta el comprobante o tirilla de la entidad originadora donde se aprecien claramente: fecha y hora de la operación, monto, número de referencia/ID de la transacción, nombre del titular y cuenta o llave destino.
+
+● Relación y motivo del depósito: ¿Cuál es tu relación con la persona que envió la transferencia y la razón por la cual se realizan los depósitos en tu cuenta por $ XXXX el día XXXXX? Por favor, adjunta documentos que puedan acreditar el origen de estos fondos.
+
+Te recomendamos, de manera amable, que devuelvas cualquier dinero que hayas recibido por error y que no te pertenezca, para evitar posibles malentendidos o complicaciones legales.
+
+Por último, recuerda que de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Sección 15.1. "Nu podrá bloquear la Cuenta Nu cuando lo estime necesario por motivos de seguridad.."
+
+Si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 35,
+                title: "Receptor pide comisión por hacer devolución",
+                category: "receptor",
+                purpose: "Informar al receptor que los fondos se removerán al no reconocerlos y que no se pagarán comisiones por su devolución",
+                content: `Te saludamos desde Nu.
+
+Queremos agradecerte por confirmarnos que, efectivamente, no reconoces los fondos que recibiste. En las próximas 48 horas hábiles, devolveremos los fondos por XXXX a la cuenta de origen. En Nu, valoramos la transparencia y queremos informarte que no tenemos la facultad de descontar parte de los fondos enviados por error, ya que pertenecen al cliente que realizó el envío y solo ellos pueden decidir sobre esos recursos.
+
+Te comentamos que este proceso es completamente transparente de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento. Estos movimientos se realizarán siempre conforme a la normatividad vigente, las políticas internas de Nu y las autorizaciones aplicables. A continuación, se detallan las principales circunstancias en las que estos débitos pueden efectuarse". Sección 4.3. "Por corrección de errores, incluyendo, entre otros, fallas en el sistema, sumas abonadas de manera equivocada, transacciones no autorizadas, duplicadas o realizadas en exceso, inconsistencias en los datos de la operación, débitos de abonos temporales realizados provisionalmente cuando el resultado de una investigación no es favorable, así como ajustes necesarios por irregularidades en el cálculo de intereses, tarifas u otros conceptos relacionados con el manejo de la cuenta, todo conforme a las políticas internas de Nu. En caso de que al momento del débito no cuentes con fondos suficientes, te obligas a reembolsar el monto correspondiente en un plazo no mayor a tres días contados desde la solicitud realizada por Nu".
+
+Si tienes alguna duda o pregunta, no dudes en contactarnos a través de nuestros canales de atención al cliente, disponibles las 24 horas, todos los días. ¡Será un placer ayudarte!
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 36,
+                title: "Receptor exige datos del originador para realizar devolución (cuenta bloqueada)",
+                category: "receptor",
+                purpose: "Informar al cliente que, por reserva bancaria y protección de datos, Nu no puede revelar los datos del originador",
+                content: `Te escribimos nuevamente desde Nu. Queremos agradecerte por tu paciencia y la colaboración brindada durante este proceso.
+
+De acuerdo a tu solicitud, te comentamos que los datos de la Cuenta originadora por reserva bancaria y protección de datos personales de nuestros clientes no podemos compartir los datos del cliente originador de los recursos, para lo cual la reserva bancaria solo puede levantarse en los casos expresamente indicados en la ley y a través de las entidades facultadas para este propósito.
+
+Nu, tiene el deber de validar la identidad de la persona que solicita acceso a tus datos personales, de conformidad con lo establecido en la Ley 1266 de 2008, la autorización para el tratamiento de datos personales que otorgaste y nuestra política de tratamiento de datos personales. Esperamos que entiendas que, dentro de las medidas de seguridad de tus datos, se encuentra garantizar que ningún tercero sin autorización acceda a tus datos personales.
+
+Queremos confirmarte que hemos retirado el bloqueo temporal de tu Cuenta Nu de manera que puedes continuar usándola con tranquilidad y realizas los movimientos financieros que requieras con ella.
+
+De acuerdo a las conversaciones que tuviste con nosotros a través de XXXXX el día XXXX en las que nos confirmas que el dinero ingresado el día XXXXXX a tu Cuenta Nu, por un monto total de XXXXXXX, no fue depositado por ti y pertenece a alguien más, te confirmamos que hemos retirado dichos fondos de tu Cuenta de Ahorros Nu de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento...
+
+De acuerdo a lo mencionado anteriormente, esperamos que esta información resuelva tus dudas, pero, si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 37,
+                title: "Receptor sin fondos, reconoce los fondos y no desea compartir soportes",
+                category: "receptor",
+                purpose: "Informar al receptor el porqué se solicitan soportes",
+                content: `Hola XXXX,
+
+Entendemos que esto puede causarte preocupación. Estamos investigando una transferencia de $XXXX recibida por error en tu cuenta el XXXX a las XXXX y solicitamos soportes para verificarla.
+
+Si los fondos te pertenecen, por favor envíanos el comprobante de la entidad originadora u otro documento que lo acredite; si prefieres no compartirlo, lo entenderemos.
+
+Si el dinero no te pertenece, te agradeceríamos devolverlo para evitar malentendidos o posibles complicaciones legales. Como alternativa, puedes depositar nuevamente el monto en tu cuenta y nosotros gestionaremos la remoción y la devolución al titular legítimo.
+
+Si necesitas ayuda con alguna de estas opciones, avísanos y te acompañamos en el proceso.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 38,
+                title: "Receptor no reconoce depósito/transferencia",
+                category: "receptor",
+                purpose: "Agradecer al receptor por confirmar no reconocer los fondos e informar que se aplicará la remoción",
+                content: `Te escribimos desde Nu
+
+Sobre el caso que nos reportaste recientemente acerca de la transferencia no reconocida:
+
+Agradecemos mucho tu colaboración al informarnos que no reconoces los fondos que recibiste el XXXX a las XXX por un valor de XXX; eso nos permite acelerar el trámite de remoción del dinero.
+
+Procederemos a devolverlos a la cuenta de origen en un plazo de 48 horas hábiles.
+
+Te comentamos que este proceso es completamente transparente de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento. Estos movimientos se realizarán siempre conforme a la normatividad vigente, las políticas internas de Nu y las autorizaciones aplicables. A continuación, se detallan las principales circunstancias en las que estos débitos pueden efectuarse". Sección 4.3. "Por corrección de errores, incluyendo, entre otros, fallas en el sistema, sumas abonadas de manera equivocada, transacciones no autorizadas, duplicadas o realizadas en exceso, inconsistencias en los datos de la operación, débitos de abonos temporales realizados provisionalmente cuando el resultado de una investigación no es favorable, así como ajustes necesarios por irregularidades en el cálculo de intereses, tarifas u otros conceptos relacionados con el manejo de la cuenta, todo conforme a las políticas internas de Nu. En caso de que al momento del débito no cuentes con fondos suficientes, te obligas a reembolsar el monto correspondiente en un plazo no mayor a tres días contados desde la solicitud realizada por Nu".
+
+Si tienes más preguntas sobre este tema o cualquier otra cosa, no dudes en ponerte en contacto con nosotros. ¡Estamos aquí para resolver todas tus inquietudes!
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 39,
+                title: "Redeban - Cx autorizó anteriormente la devolución de fondos",
+                category: "redeban",
+                purpose: "Informar la remoción al receptor que previamente informó no reconocer los fondos",
+                content: `Te escribimos nuevamente desde Nu en relación con el caso que reportaste anteriormente sobre una transferencia recibida a través de llaves Redeban desde XXBancoXXX, por $XX en la fecha del XX, la cual no reconoces.
+
+Te confirmamos que recientemente, Redeban nos informó de la transferencia que ingresó a tu cuenta. Este movimiento iba dirigido a otra Llave de Nu, por lo que solicitan la devolución de los fondos.
+
+Dado que nos autorizaste a devolver los fondos al originador a través del chat/llamada el día XX, realizaremos el reembolso a la cuenta de origen en el transcurso de las próximas 48 horas hábiles.
+
+Adicionalmente, queremos darte la tranquilidad que la remoción de este dinero, no afectará tu cuenta ni generará ningún cobro adicional.
+
+Si tienes alguna pregunta o necesitas más información, no dudes en ponerte en contacto con nosotros.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 40,
+                title: "Receptor con dudas por ingreso de fondos y declaración de renta",
+                category: "receptor",
+                purpose: "Informar remoción y aclarar dudas a receptor sobre el impacto tributario",
+                content: `Entendemos que recibiste una transferencia por error y que deseas devolverla.
+
+Sobre si esa transferencia te afectará en la declaración de renta, entendemos que esto te preocupa, por lo que te comentamos que en Nu no podemos confirmar el impacto tributario de esta transferencia, ya que dependerá de factores como el monto de tus ingresos, patrimonio y transferencias bancarias al 31 de diciembre. Por ello, te recomendamos consultar a tu contador. No obstante, considerando la realidad económica del movimiento, creemos que no debería tener una implicación fiscal adversa en tu impuesto sobre la renta para 2025.
+
+De acuerdo a la respuesta que compartiste con nosotros a través de correo el día XXXX en la que nos confirmas que el dinero ingresado el día XXXX a tu Cuenta Nu, por un monto total de XXXX COP, pertenece a alguien más, y debido a que el monto fue abonado por error en tu cuenta, te confirmamos que hemos retirado dichos fondos de tu Cuenta de Ahorros Nu de acuerdo a los términos y condiciones establecidos en el contrato que podrás encontrar en nuestra página https://nu.com.co/cf/cuenta-condiciones, específicamente en:
+
+Punto 4: "Tu Cuenta Nu puede estar sujeta a débitos o reversos de dinero en diversas situaciones previstas en este Reglamento..."
+
+De acuerdo a lo mencionado anteriormente, esperamos que esta información resuelva tus dudas, pero, si tienes cualquier otra inquietud, no dudes en contactarnos nuevamente a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            // MACROS PARA NO CLIENTES
+            {
+                id: 41,
+                title: "Respuesta a 3ros transferencia desde otro banco",
+                category: "noclientes",
+                purpose: "Informar que no podemos brindar información de terceros",
+                content: `¡Hola, XXX!
+
+Te saludamos desde Nu. Gracias por contactarnos.
+
+Entendemos tu interés en conocer el estado del caso relacionado con la transferencia errada realizada mediante llaves de Redeban.
+
+Por motivos de protección de datos y confidencialidad no podemos brindar información de terceros sin la autorización expresa del titular.
+
+Para proceder, necesitamos que el titular de la transferencia, nos remita un poder que nos autorice específicamente a suministrarte la información.
+
+Documentación requerida:
+● Poder firmado por la titular (nombre completo y número de identificación), con autorización expresa para que recibas información y gestiones relacionadas con la transferencia errada.
+● Detalles de la transferencia: fecha, valor, llave, para identificar el caso.
+
+El poder deberá estar debidamente autenticado según corresponda (notariado u otro requisito legal aplicable).
+
+Puedes enviar la documentación escaneada o fotografiada respondiendo a este correo.
+
+Queremos ayudarte en tu caso; en cuanto nos remitas la autorización completa, te informaremos del estado del trámite a la mayor brevedad.
+
+Quedamos atentos,
+
+Un abrazo,
+Equipo Nu`
+            },
+            {
+                id: 42,
+                title: "Corresponsal informa deposito en efectivo incorrecto",
+                category: "puntored",
+                purpose: "Informar al corresponsal que debe reportar con PuntoRed",
+                content: `¡Hola XXX!
+
+Gracias por tomarte el tiempo de informarnos sobre el error en el depósito en efectivo y por tu colaboración en tratar de resolverlo. Entendemos lo importante que es para ti y para el cliente afectado solucionar esta situación de la mejor manera posible.
+
+Para asegurar que el caso reciba el seguimiento adecuado, te pedimos que generes el reporte directamente con Puntored. Ellos iniciarán el proceso correspondiente, y, en colaboración con nosotros, tomaremos las medidas necesarias para intentar que los fondos lleguen a la cuenta correcta. Este reporte lo podrás realizar en los siguientes canales de Puntored:
+
+Whatsapp: +57 (313) 555-9768
+Correo: servicioal.cliente@puntored.co
+Portal transaccional de tenderos: Sección "solicitudes" en la parte inferior derecha.
+
+Al finalizar este proceso, teniendo en cuenta que la transacción fue directamente en el corresponsal, será Puntored quien te brinde la respuesta final con la solución del caso. Apreciamos mucho tu comprensión y cooperación en este proceso.
+
+Si tienes alguna otra pregunta o necesitas asistencia adicional, nuestro equipo está disponible 24 horas al día, los 7 días de la semana, para ayudarte con lo que necesites.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 43,
+                title: "Cliente Nu envía detalles de transferencia que llegó a otra cuenta pero NO es el originador (primer contacto)",
+                category: "noclientes",
+                purpose: "Informar al cliente Nu que el originador de la transferencia se debe contactar con la otra entidad",
+                content: `¡Hola, [Nombre del Cliente]!
+
+Gracias por contactarnos y por tu confianza. Entendemos tu preocupación por la transferencia que no llegó a tu cuenta y estamos aquí para guiarte en el proceso.
+
+Es importante aclarar que como las transferencias con llaves se procesan a través de Redeban. Dicha entidad es el canal oficial para gestionar las solicitudes de devolución y coordinar su evaluación con las entidades del sistema.
+
+En este caso, la solución debe iniciarla el banco emisor. Por favor, pídele a la persona que te envió el dinero que siga estos pasos:
+
+1. Contactar a su banco (___BANCO___).
+2. Solicitar que inicien una "disputa a través del portal de Redeban por envío a una llave incorrecta".
+3. Asegurarse de no pedirlo como una "devolución de dinero", ya que el banco no podrá gestionarlo de esa forma.
+
+El banco emisor es el único que puede iniciar este proceso porque tiene todos los detalles de la transacción. Una vez nos contacten por el portal de Redeban, tendremos la información necesaria para colaborar en la solución.
+
+Si tienes alguna otra pregunta, nuestro equipo está disponible 24/7 para ayudarte.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 44,
+                title: "Cliente Nu envía detalles de transferencia que llegó a otra cuenta pero NO es el originador (segundo contacto)",
+                category: "noclientes",
+                purpose: "Informar al cliente Nu que el originador de la transferencia se debe contactar con nosotros",
+                content: `¡Hola, [Nombre del Cliente]!
+
+Gracias por contactarnos de nuevo y por informarnos sobre la respuesta que recibió la persona que te envió el dinero.
+
+Entendemos que esta situación puede ser muy frustrante. Queremos aclararte el procedimiento correcto y ayudarte a encontrar una solución.
+
+Dado que las transferencias mediante llaves se procesan a través de Redeban, dicho portal es el canal habilitado para gestionar estas operaciones y coordinar con las entidades del sistema la solicitud y evaluación de una posible devolución.
+
+De acuerdo a lo anterior es importante aclarar que la responsabilidad de iniciar una disputa recae siempre en la entidad desde donde se envió el dinero. Esto se debe a que ellos tienen los registros originales de la transacción y son los únicos autorizados para iniciar un reclamo oficial a través del portal de Redeban.
+
+Para este caso es indispensable que la persona que realizó la transferencia nos contacte directamente, ya que por motivos de seguridad y protección de datos, necesitamos validar su identidad y obtener los detalles directamente del titular de la cuenta de origen.
+
+Por favor, indícale que puede contactarnos a través de nuestro chat o línea telefónica, disponibles 24/7. Una vez que nos contacte, podremos orientarlo de manera más precisa sobre el manejo del caso.
+
+Si tienes alguna otra pregunta, nuestro equipo está disponible 24/7 para ayudarte.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 45,
+                title: "Cliente envía a llave Nu pero fondos se reflejan en otra entidad",
+                category: "noclientes",
+                purpose: "Informar al cliente Nu que la llave podía ser registrada en otra entidad durante el periodo de disponibilidad Bre-b",
+                content: `Te escribimos desde Nu Colombia en relación con el caso que nos escalaste sobre la novedad presentada con una de tus llaves.
+
+Te informamos que el equipo responsable realizó una revisión detallada y encontró lo siguiente:
+
+- El 14 de julio se inició el registro de llaves para el sistema de transferencias inmediatas Bre-b. A partir de esa fecha era necesario volver a inscribir la llave para operar en Bre-B, aunque ya estuviera registrada anteriormente en Redeban.
+
+- Desde el 14 de julio, las llaves seguían funcionando en Redeban, pero quedaron libres para ser inscritas en cualquier otra entidad del sistema Bre-B.
+
+- Como no hiciste el nuevo registro en el periodo posterior al 14 de julio, tu llave continuó operativa en Nu para Redeban, pero podía ser registrada con éxito en otra entidad, sin necesidad de cancelarla en Nu, porque se encontraba en el periodo de disponibilidad para su registro en Bre-B.
+
+De acuerdo con esta información, la llave fue registrada en XXEntidadXXX sin que fuera necesaria su eliminación en Nu, ya que estaba disponible para ser registrada en cualquier otra entidad del sistema Bre-B.
+
+Te confirmamos la llave que sí registraste para BRE-B en Nu el XXX:
+
+Te sugerimos contactar a la entidad originadora para que te informen y orienten sobre el estado de la operación. Como la transferencia se realizó entre otras entidades y no fue a una llave registrada en Nu, no tuvimos participación en la transacción y no podemos intervenir. La gestión la deben realizar XXEntidadOriginadora y XXXEntidadReceptora a través del portal Redeban.
+
+Esperamos que esta información aclare tus dudas.
+
+No dudes en avisarnos si hay algo más con lo que te podamos ayudar a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 46,
+                title: "Revisión - Caso en proceso",
+                category: "general",
+                purpose: "Informar al cliente que su caso está en Revisión",
+                content: `¡Hola XXX!
+
+Te saludamos desde Nu. Esperamos te encuentres muy bien.
+
+En Nu, siempre te escuchamos y estamos trabajando para que vivas la mejor experiencia.
+
+Hemos revisado tu caso y te confirmamos que, según tu solicitud, ya se encuentra en revisión por parte de nuestro equipo especializado. Esperamos poder brindarte una actualización del caso lo antes posible.
+
+En caso de tener alguna novedad, te notificaremos por este medio.
+
+Gracias por tu comprensión. Recuerda que si tienes alguna otra duda, puedes contactarnos en cualquier momento a través de nuestros canales de atención al cliente.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 47,
+                title: "Cx desea registrar llave alfanumérica @+Nuplaca pero ya está registrada en otra entidad",
+                category: "noclientes",
+                purpose: "Informar al cliente que ya no puede registrar la llave alfanumérica @+Nuplaca",
+                content: `¡Hola XXX!
+
+Te saludamos desde Nu. Esperamos te encuentres muy bien.
+
+Comprendo tu preocupación. Si al intentar registrar tu llave alfanumérica @+Nuplaca como llave en el sistema Bre‑B notas que ya está registrada en otra entidad a nombre de otra persona, se debe a lo siguiente:
+
+- El 14 de julio de 2025 se inició el registro de llaves para el sistema de transferencias inmediatas Bre‑B. Desde esa fecha era necesario reinscribir las llaves para poder operar en Bre‑B, aun cuando ya estuvieran registradas en Redeban.
+
+- Después del 14/07/2025 las llaves siguieron funcionando en Redeban, pero al no ser registradas, quedaron disponibles para inscribirse en cualquier otra entidad del sistema Bre‑B.
+
+- Si no registraste tu llave alfanumérica en Bre‑B, otras entidades pudieron registrarla y personas distintas pudieron inscribirla. En este caso ya no está disponible como llave.
+
+Recuerda que puedes registrar otras llaves, como tu cédula, tu celular o tu correo.
+
+Esperamos que esta información aclare tus dudas.
+
+No dudes en avisarnos si hay algo más con lo que te podamos ayudar a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            },
+            {
+                id: 48,
+                title: "Cx exige devolución de Nu - fondos no llegaron a entidad esperada",
+                category: "noclientes",
+                purpose: "Informar al cliente que debe solicitar la disputa en la entidad originadora",
+                content: `Hola, XXX.
+
+Te saludamos nuevamente desde Nu Colombia.
+
+Queremos comentarte que las reglas y operación del sistema de llaves las define Bre‑B junto con Redeban. En este caso, como el dinero no ingresó a Nu ni salió de Nu, no está en nuestro alcance iniciar una intermediación; esos procesos solo pueden realizarse entre las entidades que participaron en el envío y en la recepción de los fondos.
+
+Por disposición de Redeban y sus entidades participantes, antes de efectuar una transferencia, cada entidad muestra al cliente el nombre y apellido del titular de la llave en forma encriptada. Esto se hace precisamente para que el cliente pueda confirmar el destino del dinero antes de completar las validaciones de seguridad dispuestas por cada entidad, y es la información que deben usar las entidades para validar al receptor.
+
+Desde la app de Nu puedes verificar en cualquier momento las llaves que tienes registradas. Te recomendamos siempre confirmar con tus contactos la información de destino de la transferencia, incluida la llave, y así mismo confirmar los datos a los cuales deseas recibir la transferencia inmediata.
+
+No dudes en avisarnos si hay algo más con lo que te podamos ayudar a través de nuestros canales oficiales de atención al cliente 24/7.
+
+Un abrazo,
+Equipo Nu.`
+            }
+        ];
+
+        // Favorites management
+        let favorites = JSON.parse(localStorage.getItem('macroFavorites')) || [];
+        let currentFilter = 'originador';
+        let currentMacro = null;
+
+        function updateFavoritesButton() {
+            // Favorites button styling is handled by the nav-tab styles
+        }
+
+        function toggleFavorite(id, event) {
+            event.stopPropagation();
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showToast('Eliminado de favoritos');
+            } else {
+                favorites.push(id);
+                showToast('Añadido a favoritos');
+            }
+            localStorage.setItem('macroFavorites', JSON.stringify(favorites));
+            updateFavoritesButton();
+            renderMacros();
+        }
+
+        function filterMacros(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('active');
+                }
+            });
+            renderMacros();
+        }
+
+        function searchMacros() {
+            renderMacros();
+        }
+
+        function getFilteredMacros() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            return macros.filter(macro => {
+                const matchesSearch = !searchTerm || 
+                    macro.title.toLowerCase().includes(searchTerm) ||
+                    macro.content.toLowerCase().includes(searchTerm) ||
+                    macro.purpose.toLowerCase().includes(searchTerm);
+
+                const matchesFilter = (currentFilter === 'favorites' && favorites.includes(macro.id)) ||
+                    macro.category === currentFilter;
+
+                return matchesSearch && matchesFilter;
+            });
+        }
+
+        function getCategoryClass(category) {
+            const classes = {
+                'originador': 'category-originador',
+                'receptor': 'category-receptor',
+                'redeban': 'category-redeban',
+                'puntored': 'category-puntored',
+                'ach': 'category-ach',
+                'noclientes': 'category-noclientes',
+                'general': 'category-general'
+            };
+            return classes[category] || 'category-general';
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                'originador': 'Originador',
+                'receptor': 'Receptor',
+                'redeban': 'Redeban',
+                'puntored': 'PuntoRed',
+                'ach': 'ACH',
+                'noclientes': 'No Clientes',
+                'general': 'General'
+            };
+            return labels[category] || category;
+        }
+
+        function getGreeting(content) {
+            const lines = content.split('\n');
+            for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith('Hola') || line.startsWith('¡Hola') || line.startsWith('Te saludamos') || 
+                    line.startsWith('Te escribimos') || line.startsWith('Te contactamos') || 
+                    line.startsWith('Nos alegra') || line.startsWith('Gracias por') ||
+                    line.startsWith('Comprendo') || line.startsWith('Entendemos')) {
+                    return line.substring(0, 60) + (line.length > 60 ? '...' : '');
+                }
+            }
+            return 'Hola, [Nombre del Cliente]';
+        }
+
+        function renderMacros() {
+            const grid = document.getElementById('macrosGrid');
+            const noResults = document.getElementById('noResults');
+            const stats = document.getElementById('stats');
+            const filteredMacros = getFilteredMacros();
+
+            if (filteredMacros.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                stats.textContent = '';
+            } else {
+                grid.style.display = 'grid';
+                noResults.style.display = 'none';
+                stats.textContent = `Mostrando ${filteredMacros.length} de ${macros.length} macros`;
+
+                grid.innerHTML = filteredMacros.map(macro => `
+                    <div class="macro-card">
+                        <div class="macro-header">
+                            <div class="macro-icon">📧</div>
+                            <div class="macro-title-wrapper">
+                                <h3 class="macro-title">${macro.title}</h3>
+                            </div>
+                            <span class="macro-category ${getCategoryClass(macro.category)}">${getCategoryLabel(macro.category)}</span>
+                        </div>
+                        <div class="macro-body">
+                            <p class="macro-greeting">${getGreeting(macro.content)}</p>
+                            <div class="macro-preview">${macro.content.substring(0, 150).replace(/\n/g, ' ')}...</div>
+                            <div class="macro-signature">
+                                <div class="signature-logo">Nu</div>
+                                <span class="signature-text">Equipo Nu Colombia</span>
+                            </div>
+                        </div>
+                        <div class="macro-actions">
+                            <button class="btn btn-view" onclick="openModal(${macro.id})">Ver más</button>
+                            <button class="btn btn-copy" onclick="copyMacro(${macro.id}, this)">Copiar</button>
+                            <button class="btn-favorite ${favorites.includes(macro.id) ? 'active' : ''}" onclick="toggleFavorite(${macro.id}, event)">
+                                ${favorites.includes(macro.id) ? '⭐' : '☆'}
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openModal(id) {
+            const macro = macros.find(m => m.id === id);
+            if (!macro) return;
+
+            currentMacro = macro;
+            document.getElementById('modalTitle').textContent = macro.title;
+            document.getElementById('modalPurpose').innerHTML = `<strong>Propósito:</strong> ${macro.purpose}`;
+            document.getElementById('modalText').textContent = macro.content;
+            document.getElementById('macroModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('macroModal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentMacro = null;
+        }
+
+        function copyMacro(id, button) {
+            const macro = macros.find(m => m.id === id);
+            if (!macro) return;
+
+            navigator.clipboard.writeText(macro.content).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '¡Copiado!';
+                button.classList.add('copied');
+                showToast('Macro copiada al portapapeles');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyFromModal() {
+            if (!currentMacro) return;
+            
+            navigator.clipboard.writeText(currentMacro.content).then(() => {
+                showToast('Macro copiada al portapapeles');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal on outside click
+        document.getElementById('macroModal').addEventListener('click', (e) => {
+            if (e.target.id === 'macroModal') {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        updateFavoritesButton();
+        renderMacros();
+    </script>
+</body>
+</html>
